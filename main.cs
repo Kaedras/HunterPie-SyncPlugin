@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -76,11 +77,13 @@ namespace HunterPie.Plugins {
 
     public class SyncPlugin : IPlugin {
         private const string ServerUrl = "http://mhwsync.herokuapp.com";
+        private const string ConfigFile = "Modules\\SyncPlugin\\SyncPlugin.config";
         private string partyLeader = "";
         private int retries = 5;
         private string sessionID = "";
         private string sessionUrlString = "";
         private Thread syncThreadReference;
+        private bool showDetailedMessages = false;
 
         private readonly StatusList statusList = new StatusList();
 
@@ -90,6 +93,7 @@ namespace HunterPie.Plugins {
         private bool isInParty { get; set; } = false;
         private bool isPartyLeader { get; set; } = false;
         private bool monsterThreadsStopped { get; set; } = false;
+        private Configuration config { get; set; }
 
         private string PartyLeader {
             get => partyLeader;
@@ -138,6 +142,8 @@ namespace HunterPie.Plugins {
             Context.ThirdMonster.OnMonsterSpawn += OnMonsterSpawn;
             Context.ThirdMonster.OnMonsterDespawn += OnMonsterDespawn;
             Context.ThirdMonster.OnMonsterDeath += OnMonsterDeath;
+
+            readConfig();
         }
 
         public void Unload() {
@@ -168,19 +174,36 @@ namespace HunterPie.Plugins {
             }
         }
 
+        private void readConfig() {
+            ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
+            fileMap.ExeConfigFilename = ConfigFile;
+            config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
+            if (File.Exists(ConfigFile)) {
+                try {
+                    showDetailedMessages = bool.Parse(config.AppSettings.Settings["showDetailedMessages"].Value);
+                    log("Loaded config file", true);
+                } catch (Exception e) {
+                    log("Error in readConfig:" + e.GetType().ToString() + " - " + e.Message);
+                }
+            } else { //create new config file
+                config.AppSettings.Settings.Add("showDetailedMessages", false.ToString());
+                config.Save();
+            }
+        }
+
         private void clearMonster(int monsterIndex) {
             get(sessionUrlString + "/monster/" + monsterIndex + "/clear");
         }
 
         private bool createPartyIfNotExist() {
             if (partyExists()) {
-                log("Did not create session because it already exists");
+                log("Did not create session because it already exists", true);
                 return true;
             }
 
             Response r = get(sessionUrlString + "/create");
             if (r.status == Status.ok) {
-                log("Created session");
+                log("Created session", true);
                 return true;
             } else {
                 log("Error creating session: " + r.status + " - " + r.value);
@@ -226,8 +249,14 @@ namespace HunterPie.Plugins {
             return false;
         }
 
-        private void log(string message) {
-            Debugger.Module(message, Name);
+        private void log(string message, bool detailedOnly = false) {
+            if (detailedOnly) {
+                if (showDetailedMessages) {
+                    Debugger.Module(message, Name);
+                }
+            } else {
+                Debugger.Module(message, Name);
+            }
         }
 
         private void OnBuildupChange(object source, MonsterAilmentEventArgs args) {
@@ -299,21 +328,18 @@ namespace HunterPie.Plugins {
                     PartyLeader = Context.Player.PlayerParty.Members[i].Name;
                 }
 
-                if (Context.Player.PlayerParty.Members[i].IsMe && Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //player is party leader
+                if (Context.Player.PlayerParty.Members[i].IsMe && Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //if player is party leader
                     isPartyLeader = true;
                     isInParty = createPartyIfNotExist();
-                    if (!isInParty) {
-                        log("Could not create session");
-                    }
-                } else if (Context.Player.PlayerParty.Members[i].IsMe && !Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //player is not party leader
+                } else if (Context.Player.PlayerParty.Members[i].IsMe && !Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //if player is not party leader
                     isPartyLeader = false;
                     isInParty = partyExists();
-                    if (isInParty) {
-                        log("Entered session");
+                    if (isInParty) { //if party leader has SyncPlugin installed and enabled
+                        log("Entered " + PartyLeader + "\'s session");
                         stopMonsterThreads();
                         startSyncThread();
                     } else {
-                        log("There is no session to enter");
+                        log("There is no session to enter", true);
                         if (monsterThreadsStopped) {
                             startMonsterThreads();
                         }
@@ -356,7 +382,7 @@ namespace HunterPie.Plugins {
                     monster.Parts[i].Health = int.Parse(result.value);
                 } else {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                        log("error in pullAilmentBuildup: " + result.value);
+                        log("Error in pullAilmentBuildup: " + result.value);
                     }
                 }
             }
@@ -370,7 +396,7 @@ namespace HunterPie.Plugins {
                     monster.Parts[i].Health = int.Parse(result.value);
                 } else {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                        log("error in pullPartHP: " + result.value);
+                        log("Error in pullPartHP: " + result.value);
                     }
                 }
             }
@@ -380,7 +406,7 @@ namespace HunterPie.Plugins {
             Response result = get(sessionUrlString + "/monster/" + monsterindex + "/ailment/" + ailmentindex + "/buildup/" + buildup);
             if (result.status != Status.ok) {
                 if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                    log("error in pushAilment: " + result.value);
+                    log("Error in pushAilment: " + result.value);
                 }
             }
         }
@@ -396,7 +422,7 @@ namespace HunterPie.Plugins {
                 result = get(sessionUrlString + "/monster/" + (monster.MonsterNumber - 1) + "/part/" + i + "/hp/" + (int)hp);
                 if (result.status != Status.ok) {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                        log("error in pushPartHP: " + result.value);
+                        log("Error in pushPartHP: " + result.value);
                     }
                 }
             }
@@ -408,16 +434,20 @@ namespace HunterPie.Plugins {
             }
             if (statusList.errorCount > 0) {
                 log(statusList.errorCount + " errors occurred in this session");
-                if (statusList.errorCount > 0) {
-                    log(statusList.ToString());
-                }
+                log("\n" + statusList.ToString());
                 statusList.clear();
+            } else {
+                log("No errors occurred in this session", true);
             }
             sessionID = "";
             partyLeader = "";
+            if (isInParty && !isPartyLeader) {
+                log("Left session");
+            } else if (isInParty && isPartyLeader) {
+                log("Deleted session", true);
+            }
             isInParty = false;
             isPartyLeader = false;
-            log("Left session");
         }
 
         private void startMonsterThreads() {
@@ -425,7 +455,7 @@ namespace HunterPie.Plugins {
             Context.SecondMonster.StartThreadingScan();
             Context.ThirdMonster.StartThreadingScan();
             monsterThreadsStopped = false;
-            log("Started monster threads");
+            log("Started monster threads", true);
         }
 
         private void startSyncThread() {
@@ -438,11 +468,12 @@ namespace HunterPie.Plugins {
             Context.SecondMonster.StopThread();
             Context.ThirdMonster.StopThread();
             monsterThreadsStopped = true;
-            log("Stopped monster threads");
+            log("Stopped monster threads", true);
         }
 
         private void stopSyncThread() {
             syncThreadReference.Abort();
+            log("Stopped sync thread", true);
         }
 
         private void syncThread() {

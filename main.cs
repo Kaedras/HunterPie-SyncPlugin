@@ -144,6 +144,8 @@ namespace HunterPie.Plugins {
             Context.ThirdMonster.OnMonsterDeath += OnMonsterDeath;
 
             readConfig();
+            InitializeSessionAsync();
+            syncThreadReference = new Thread(syncThread);
         }
 
         public void Unload() {
@@ -171,6 +173,13 @@ namespace HunterPie.Plugins {
             }
             for (int i = 0; i < Context.ThirdMonster.Ailments.Count; i++) {
                 Context.ThirdMonster.Ailments[i].OnBuildupChange -= OnBuildupChange;
+            }
+
+            if (isInParty) {
+                quitSession();
+                if (syncThreadReference.IsAlive) {
+                    stopSyncThread();
+                }
             }
         }
 
@@ -275,6 +284,9 @@ namespace HunterPie.Plugins {
         private void OnCharacterLogout(object source, EventArgs args) {
             if (isInParty) {
                 quitSession();
+                if (syncThreadReference.IsAlive) {
+                    stopSyncThread();
+                }
             }
         }
 
@@ -303,22 +315,33 @@ namespace HunterPie.Plugins {
         private void OnSessionChange(object source, EventArgs args) {
             if (isInParty) { //quit old session
                 quitSession();
-                stopSyncThread();
+                if (syncThreadReference.IsAlive) {
+                    stopSyncThread();
+                }
             }
             SessionID = Context.Player.SessionID;
             InitializeSessionAsync();
         }
 
         private void OnZoneChange(object source, EventArgs args) {
+            if (isInParty) { //quit old session
+                quitSession();
+                if (syncThreadReference.IsAlive) {
+                    stopSyncThread();
+                }
+            }
             InitializeSessionAsync();
         }
 
         private async void InitializeSessionAsync() {
             await System.Threading.Tasks.Task.Yield();
-            Thread.Sleep(2000);
-            if (Context.Player.InPeaceZone) {
+            Thread.Sleep(1000);
+            if (Context.Player.InPeaceZone || Context.Player.ZoneID == 504) { //if player is in peace zone or training area
                 if (isInParty) {
                     quitSession();
+                    if (syncThreadReference.IsAlive) {
+                        stopSyncThread();
+                    }
                 }
                 return;
             }
@@ -439,13 +462,12 @@ namespace HunterPie.Plugins {
             } else {
                 log("No errors occurred in this session", true);
             }
-            sessionID = "";
-            partyLeader = "";
             if (isInParty && !isPartyLeader) {
                 log("Left session");
             } else if (isInParty && isPartyLeader) {
                 log("Deleted session", true);
             }
+            partyLeader = "";
             isInParty = false;
             isPartyLeader = false;
         }
@@ -459,7 +481,11 @@ namespace HunterPie.Plugins {
         }
 
         private void startSyncThread() {
-            syncThreadReference = new Thread(syncThread);
+            if (syncThreadReference.IsAlive) {
+                log("Error starting sync thread: it is already active");
+                return;
+            }
+            log("Started sync thread", true);
             syncThreadReference.Start();
         }
 

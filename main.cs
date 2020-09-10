@@ -214,9 +214,13 @@ namespace HunterPie.Plugins {
             if (r.status == Status.ok) {
                 log("Created session", true);
                 return true;
-            } else {
-                log("Error creating session: " + r.status + " - " + r.value);
-            }
+			}
+			if (r.status == Status.sessionAlreadyExists) {
+				log("Did not create session because it already exists", true);
+                return true;
+			}
+			
+            log("Error creating session: " + r.status + " - " + r.value);
             return false;
         }
 

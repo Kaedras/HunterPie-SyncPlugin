@@ -2,8 +2,8 @@ This is a plugin for HunterPie (https://github.com/Haato3o/HunterPie) that synch
 The server is open source and available here: https://github.com/Kaedras/mhwsync
 It is currently deployed on a free Heroku dyno, so there could be performance issues if the number of users becomes too high.
 
-Please note that this plugin has not undergone extensive testing yet as I can't test it properly without the help of other players and I expect the first few versions to not work.
-Additionally updating HunterPie can cause this plugin to stop working, and there can be incompatibility with the master branch as I'm currently using the beta branch.
+Please note that this plugin has not undergone extensive testing yet as I can't test it properly without the help of other players.
+Additionally updating HunterPie could cause this plugin to stop working, and there could be incompatibility with the master branch as I'm currently using the beta branch.
 
 Installation:
 (1) Download the latest Release from here: https://github.com/Kaedras/HunterPie-SyncPlugin/releases

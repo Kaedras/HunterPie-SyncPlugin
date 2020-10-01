@@ -10,6 +10,6 @@ Please note that this plugin has not undergone extensive testing yet as I can't 
 Installation:
 ---------------
 - Method 1:
-	- Download [module.json](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/module.json) and put it in HunterPie/Modules/SyncPlugin/
+	- Download [module.json](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/module.json) and either drag it into you HunterPie window or put it in HunterPie/Modules/SyncPlugin/
 - Method 2:
 	- Download the [zipped version](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/Release.zip) and extract it to your HunterPie folder

@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -72,12 +71,13 @@ namespace HunterPie.Plugins {
             return str;
         }
 
-        public void increment(Status status) => list[status]++;
+        public void increment(Status status) {
+            list[status]++;
+        }
     }
 
     public class SyncPlugin : IPlugin {
         private const string ServerUrl = "http://mhwsync.herokuapp.com";
-        private const string ConfigFile = "Modules\\SyncPlugin\\SyncPlugin.config";
         private string partyLeader = "";
         private int retries = 5;
         private string sessionID = "";
@@ -93,10 +93,11 @@ namespace HunterPie.Plugins {
         private bool isInParty { get; set; } = false;
         private bool isPartyLeader { get; set; } = false;
         private bool monsterThreadsStopped { get; set; } = false;
-        private Configuration config { get; set; }
 
         private string PartyLeader {
-            get => partyLeader;
+            get {
+                return partyLeader;
+            }
             set {
                 partyLeader = HttpUtility.UrlEncode(value);
                 sessionUrlString = ServerUrl + "/session/" + SessionID + PartyLeader;
@@ -104,7 +105,9 @@ namespace HunterPie.Plugins {
         }
 
         private string SessionID {
-            get => sessionID;
+            get {
+                return sessionID;
+            }
             set {
                 sessionID = HttpUtility.UrlEncode(value);
                 sessionUrlString = ServerUrl + "/session/" + SessionID + PartyLeader;
@@ -143,7 +146,8 @@ namespace HunterPie.Plugins {
             Context.ThirdMonster.OnMonsterDespawn += OnMonsterDespawn;
             Context.ThirdMonster.OnMonsterDeath += OnMonsterDeath;
 
-            readConfig();
+            //no need for a real config file to check for one boolean
+            showDetailedMessages = File.Exists("Modules\\" + Name + "\\DEBUG");
             InitializeSessionAsync();
             syncThreadReference = new Thread(syncThread);
         }
@@ -183,23 +187,6 @@ namespace HunterPie.Plugins {
             }
         }
 
-        private void readConfig() {
-            ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
-            fileMap.ExeConfigFilename = ConfigFile;
-            config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
-            if (File.Exists(ConfigFile)) {
-                try {
-                    showDetailedMessages = bool.Parse(config.AppSettings.Settings["showDetailedMessages"].Value);
-                    log("Loaded config file", true);
-                } catch (Exception e) {
-                    log("Error in readConfig:" + e.GetType().ToString() + " - " + e.Message);
-                }
-            } else { //create new config file
-                config.AppSettings.Settings.Add("showDetailedMessages", false.ToString());
-                config.Save();
-            }
-        }
-
         private void clearMonster(int monsterIndex) {
             get(sessionUrlString + "/monster/" + monsterIndex + "/clear");
         }
@@ -214,12 +201,12 @@ namespace HunterPie.Plugins {
             if (r.status == Status.ok) {
                 log("Created session", true);
                 return true;
-			}
-			if (r.status == Status.sessionAlreadyExists) {
-				log("Did not create session because it already exists", true);
+            }
+            if (r.status == Status.sessionAlreadyExists) {
+                log("Did not create session because it already exists", true);
                 return true;
-			}
-			
+            }
+
             log("Error creating session: " + r.status + " - " + r.value);
             return false;
         }

@@ -415,7 +415,7 @@ namespace HunterPie.Plugins {
             for (int i = 0; i < monster.Ailments.Count; i++) {
                 result = get(sessionUrlString + "/monster/" + (monster.MonsterNumber - 1) + "/ailment/" + i + "/buildup");
                 if (result.status == Status.ok) {
-                    monster.Parts[i].Health = int.Parse(result.value);
+                    monster.Ailments[i].Buildup = int.Parse(result.value);
                 } else {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
                         error("Error in pullAilmentBuildup: " + result.value);

@@ -11,7 +11,7 @@ class AutoHasher():
         "hash.py",
         "main.cs",
         "Release.zip",
-        "README",
+        "README.md",
         "LICENSE",
         ".gitattributes",
         ".gitignore",

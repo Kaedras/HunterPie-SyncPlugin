@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -84,6 +85,7 @@ namespace HunterPie.Plugins {
         private string sessionUrlString = "";
         private Thread syncThreadReference;
         private bool showDetailedMessages = false;
+        private StreamWriter errorLogWriter = null;
 
         private readonly StatusList statusList = new StatusList();
 
@@ -148,6 +150,14 @@ namespace HunterPie.Plugins {
 
             //no need for a real config file to check for one boolean
             showDetailedMessages = File.Exists("Modules\\" + Name + "\\DEBUG");
+			
+            try {
+                errorLogWriter = new StreamWriter(File.Open("Modules\\" + Name + "\\errors.log", FileMode.Append, FileAccess.Write, FileShare.Read));
+                errorLogWriter.AutoFlush = true;
+            } catch (Exception e) {
+                log("Error opening/creating error log: " + e.Message);
+            }
+			
             InitializeSessionAsync();
             syncThreadReference = new Thread(syncThread);
         }
@@ -185,6 +195,11 @@ namespace HunterPie.Plugins {
                     stopSyncThread();
                 }
             }
+
+            if (errorLogWriter != null) {
+                errorLogWriter.Flush();
+                errorLogWriter.Close();
+            }
         }
 
         private void clearMonster(int monsterIndex) {
@@ -207,7 +222,7 @@ namespace HunterPie.Plugins {
                 return true;
             }
 
-            log("Error creating session: " + r.status + " - " + r.value);
+            error("Error creating session: " + r.status + " - " + r.value);
             return false;
         }
 
@@ -226,7 +241,7 @@ namespace HunterPie.Plugins {
                 }
                 return r;
             } catch (Exception e) {
-                log(e.GetType() + " occurred in get(" + url + "): " + e.Message);
+                error(e.GetType() + " occurred in get(" + url + "): " + e.Message);
                 statusList.increment(Status.exception);
                 Response response = new Response {
                     status = Status.exception,
@@ -256,6 +271,13 @@ namespace HunterPie.Plugins {
                 }
             } else {
                 Debugger.Module(message, Name);
+            }
+        }
+
+        private void error(string message) {
+			log(message);
+            if (errorLogWriter != null) {
+                errorLogWriter.WriteLine("[" + DateTime.UtcNow.ToString(new CultureInfo("en-gb")) + "] " + message);
             }
         }
 
@@ -396,7 +418,7 @@ namespace HunterPie.Plugins {
                     monster.Parts[i].Health = int.Parse(result.value);
                 } else {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                        log("Error in pullAilmentBuildup: " + result.value);
+                        error("Error in pullAilmentBuildup: " + result.value);
                     }
                 }
             }
@@ -410,7 +432,7 @@ namespace HunterPie.Plugins {
                     monster.Parts[i].Health = int.Parse(result.value);
                 } else {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                        log("Error in pullPartHP: " + result.value);
+                        error("Error in pullPartHP: " + result.value);
                     }
                 }
             }
@@ -420,7 +442,7 @@ namespace HunterPie.Plugins {
             Response result = get(sessionUrlString + "/monster/" + monsterindex + "/ailment/" + ailmentindex + "/buildup/" + buildup);
             if (result.status != Status.ok) {
                 if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                    log("Error in pushAilment: " + result.value);
+                    error("Error in pushAilment: " + result.value);
                 }
             }
         }
@@ -436,7 +458,7 @@ namespace HunterPie.Plugins {
                 result = get(sessionUrlString + "/monster/" + (monster.MonsterNumber - 1) + "/part/" + i + "/hp/" + (int)hp);
                 if (result.status != Status.ok) {
                     if (statusList.count(result.status) == 1) { //only show first error of each type; status count has already been incremented if error has occurred
-                        log("Error in pushPartHP: " + result.value);
+                        error("Error in pushPartHP: " + result.value);
                     }
                 }
             }
@@ -473,7 +495,7 @@ namespace HunterPie.Plugins {
 
         private void startSyncThread() {
             if (syncThreadReference.IsAlive) {
-                log("Error starting sync thread: it is already active");
+                error("Error starting sync thread: it is already active");
                 return;
             }
             log("Started sync thread", true);

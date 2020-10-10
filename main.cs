@@ -394,16 +394,16 @@ namespace HunterPie.Plugins {
             return false;
         }
 
-        private bool processBuildup(Monster target, Ailment ailment) {
+        private bool processBuildup(Monster monster, Ailment ailment) {
             int value;
-            for (int i = 0; i < target.Ailments.Count; i++) { //check if ailment is on target, if so send data to server
-                if (target.Ailments[i].Equals(ailment)) {
+            for (int i = 0; i < monster.Ailments.Count; i++) { //check if ailment is on target, if so send data to server
+                if (monster.Ailments[i].Equals(ailment)) {
                     if (float.IsNaN(ailment.Buildup)) {
                         value = 0;
                     } else {
                         value = (int)ailment.Buildup;
                     }
-                    pushAilment(target.MonsterNumber - 1, i, value);
+                    pushAilment(monster.MonsterNumber - 1, i, value);
                     return true;
                 }
             }
@@ -469,8 +469,8 @@ namespace HunterPie.Plugins {
                 get(sessionUrlString + "/delete");
             }
             if (statusList.errorCount > 0) {
-                log(statusList.errorCount + " errors occurred in this session");
-                log("\n" + statusList.ToString());
+                error(statusList.errorCount + " errors occurred in this session");
+                error(statusList.ToString());
                 statusList.clear();
             } else {
                 log("No errors occurred in this session", true);

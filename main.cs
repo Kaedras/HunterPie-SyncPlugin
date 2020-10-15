@@ -347,40 +347,45 @@ namespace HunterPie.Plugins {
         }
 
         private async void InitializeSessionAsync() {
-            await System.Threading.Tasks.Task.Yield();
-            Thread.Sleep(1000);
-            if (Context.Player.InPeaceZone || Context.Player.ZoneID == 504) { //if player is in peace zone or training area
-                if (isInParty) {
-                    quitSession();
-                    if (syncThreadReference.IsAlive) {
-                        stopSyncThread();
+            try {
+                await System.Threading.Tasks.Task.Yield();
+                Thread.Sleep(1000);
+                if (Context.Player.InPeaceZone || Context.Player.ZoneID == 504 || string.IsNullOrEmpty(SessionID)) { //if player is in peace zone/training area or sessionID is empty
+                    if (isInParty) {
+                        quitSession();
+                        if (syncThreadReference.IsAlive) {
+                            stopSyncThread();
+                        }
                     }
-                }
-                return;
-            }
-
-            for (int i = 0; i < Context.Player.PlayerParty.Members.Count; i++) { //check if player is party leader
-                if (Context.Player.PlayerParty.Members[i].IsPartyLeader) {
-                    PartyLeader = Context.Player.PlayerParty.Members[i].Name;
+                    return;
                 }
 
-                if (Context.Player.PlayerParty.Members[i].IsMe && Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //if player is party leader
-                    isPartyLeader = true;
-                    isInParty = createPartyIfNotExist();
-                } else if (Context.Player.PlayerParty.Members[i].IsMe && !Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //if player is not party leader
-                    isPartyLeader = false;
-                    isInParty = partyExists();
-                    if (isInParty) { //if party leader has SyncPlugin installed and enabled
-                        log("Entered " + PartyLeader + "\'s session");
-                        stopMonsterThreads();
-                        startSyncThread();
-                    } else {
-                        log("There is no session to enter", true);
-                        if (monsterThreadsStopped) {
-                            startMonsterThreads();
+                for (int i = 0; i < Context.Player.PlayerParty.Members.Count; i++) { //check if player is party leader
+                    if (Context.Player.PlayerParty.Members[i].IsPartyLeader) {
+                        PartyLeader = Context.Player.PlayerParty.Members[i].Name;
+                    }
+
+                    if (Context.Player.PlayerParty.Members[i].IsMe && Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //if player is party leader
+                        isPartyLeader = true;
+                        isInParty = createPartyIfNotExist();
+                    } else if (Context.Player.PlayerParty.Members[i].IsMe && !Context.Player.PlayerParty.Members[i].IsPartyLeader && Context.Player.PlayerParty.Members[i].IsInParty) { //if player is not party leader
+                        isPartyLeader = false;
+                        isInParty = partyExists();
+                        if (isInParty) { //if party leader has SyncPlugin installed and enabled
+                            log("Entered " + PartyLeader + "\'s session");
+                            stopMonsterThreads();
+                            startSyncThread();
+                        } else {
+                            log("There is no session to enter", true);
+                            if (monsterThreadsStopped) {
+                                startMonsterThreads();
+                            }
                         }
                     }
                 }
+            }
+            catch (NullReferenceException) { //happened while closing the game, needs further testing
+                log("NullReferenceException in InitializeSessionAsync()");
             }
         }
 

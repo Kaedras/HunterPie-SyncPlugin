@@ -3,7 +3,7 @@
     "EntryPoint": "main.cs",
     "Description": "Part and ailment synchronization for HunterPie",
     "Author": "Kaedras",
-    "Version": "1.0.8",
+    "Version": "1.0.9",
     "Dependencies": [
         "lib\\System.Web.dll"
     ],
@@ -12,7 +12,7 @@
         "MinimumVersion": "1.0.3.97",
         "FileHashes": {
             "lib\\System.Web.dll": "02976e2dd29a5241483e0d9bf82dc823334dce41d97eeecef35ae8680547d122",
-            "SyncPlugin.dll": "9b8244d7b207e171ace771bfd3fe205209984af577daa733cd2a2fa5154d7f81"
+            "SyncPlugin.dll": "318ef8414d2bca8ab47df5f8cc812b79f9622f1a864aec1c950a871ce2f1ab3e"
         }
     }
 }

@@ -161,6 +161,9 @@ namespace HunterPie.Plugins {
 			
             InitializeSessionAsync();
             syncThreadReference = new Thread(syncThread);
+
+            //part of temporary workaround
+            delay = UserSettings.PlayerConfig.Overlay.GameScanDelay;
         }
 
         public void Unload() {
@@ -189,6 +192,9 @@ namespace HunterPie.Plugins {
             for (int i = 0; i < Context.ThirdMonster.Ailments.Count; i++) {
                 Context.ThirdMonster.Ailments[i].OnBuildupChange -= OnBuildupChange;
             }
+
+            //part of temporary workaround
+            UserSettings.PlayerConfig.Overlay.GameScanDelay = delay;
 
             if (isInParty) {
                 quitSession();
@@ -506,7 +512,7 @@ namespace HunterPie.Plugins {
                 return;
             }
 
-            //temporary workaround
+            //part of temporary workaround
             delay = UserSettings.PlayerConfig.Overlay.GameScanDelay;
             UserSettings.PlayerConfig.Overlay.GameScanDelay = 2000;
 
@@ -526,7 +532,7 @@ namespace HunterPie.Plugins {
             syncThreadReference.Abort();
             log("Stopped sync thread", true);
 
-            //temporary workaround
+            //part of temporary workaround
             UserSettings.PlayerConfig.Overlay.GameScanDelay = delay;
         }
 

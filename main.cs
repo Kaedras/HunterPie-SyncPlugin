@@ -81,6 +81,7 @@ namespace HunterPie.Plugins {
         private const string ServerUrl = "http://mhwsync.herokuapp.com";
         private string partyLeader = "";
         private int retries = 5;
+        private int delay;
         private string sessionID = "";
         private string sessionUrlString = "";
         private Thread syncThreadReference;
@@ -347,6 +348,7 @@ namespace HunterPie.Plugins {
         }
 
         private async void InitializeSessionAsync() {
+            SessionID = Context.Player.SessionID;
             try {
                 await System.Threading.Tasks.Task.Yield();
                 Thread.Sleep(1000);
@@ -373,13 +375,13 @@ namespace HunterPie.Plugins {
                         isInParty = partyExists();
                         if (isInParty) { //if party leader has SyncPlugin installed and enabled
                             log("Entered " + PartyLeader + "\'s session");
-                            stopMonsterThreads();
+                            //stopMonsterThreads();
                             startSyncThread();
                         } else {
                             log("There is no session to enter", true);
-                            if (monsterThreadsStopped) {
-                                startMonsterThreads();
-                            }
+                            //if (monsterThreadsStopped) {
+                            //    startMonsterThreads();
+                            //}
                         }
                     }
                 }
@@ -490,34 +492,42 @@ namespace HunterPie.Plugins {
             isPartyLeader = false;
         }
 
-        private void startMonsterThreads() {
-            Context.FirstMonster.StartThreadingScan();
-            Context.SecondMonster.StartThreadingScan();
-            Context.ThirdMonster.StartThreadingScan();
-            monsterThreadsStopped = false;
-            log("Started monster threads", true);
-        }
+        //private void startMonsterThreads() {
+        //    Context.FirstMonster.StartThreadingScan();
+        //    Context.SecondMonster.StartThreadingScan();
+        //    Context.ThirdMonster.StartThreadingScan();
+        //    monsterThreadsStopped = false;
+        //    log("Started monster threads", true);
+        //}
 
         private void startSyncThread() {
             if (syncThreadReference.IsAlive) {
                 error("Error starting sync thread: it is already active");
                 return;
             }
+
+            //temporary workaround
+            delay = UserSettings.PlayerConfig.Overlay.GameScanDelay;
+            UserSettings.PlayerConfig.Overlay.GameScanDelay = 2000;
+
             log("Started sync thread", true);
             syncThreadReference.Start();
         }
 
-        private void stopMonsterThreads() {
-            Context.FirstMonster.StopThread();
-            Context.SecondMonster.StopThread();
-            Context.ThirdMonster.StopThread();
-            monsterThreadsStopped = true;
-            log("Stopped monster threads", true);
-        }
+        //private void stopMonsterThreads() {
+        //    Context.FirstMonster.StopThread();
+        //    Context.SecondMonster.StopThread();
+        //    Context.ThirdMonster.StopThread();
+        //    monsterThreadsStopped = true;
+        //    log("Stopped monster threads", true);
+        //}
 
         private void stopSyncThread() {
             syncThreadReference.Abort();
             log("Stopped sync thread", true);
+
+            //temporary workaround
+            UserSettings.PlayerConfig.Overlay.GameScanDelay = delay;
         }
 
         private void syncThread() {
@@ -528,7 +538,7 @@ namespace HunterPie.Plugins {
                 pullAilmentBuildup(Context.FirstMonster);
                 pullAilmentBuildup(Context.SecondMonster);
                 pullAilmentBuildup(Context.ThirdMonster);
-                Thread.Sleep(UserSettings.PlayerConfig.Overlay.GameScanDelay);
+                Thread.Sleep(delay);
             }
         }
     }

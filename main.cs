@@ -121,6 +121,9 @@ namespace HunterPie.Plugins {
             Name = "SyncPlugin";
             Description = "Part and ailment synchronization for HunterPie";
 
+            //disable functionality until issues are resolved
+            return;
+
             while (!isServerAlive()) {
                 if (retries-- > 0) {
                     log("Could not reach server, " + retries + " retries remaining");

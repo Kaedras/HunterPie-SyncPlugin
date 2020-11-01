@@ -2,7 +2,6 @@
 01/11/2020
 
 The plugin is currently causing several issues without providing the intended functionality, therefore I've shut down the server until they are resolved.<br>
-Please disable it if you don't want error messages to appear when you start HunterPie.
 
 
 Description:

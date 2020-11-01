@@ -13,6 +13,7 @@ class AutoHasher():
         "Release.zip",
         "README.md",
         "LICENSE",
+        ".vs",
         ".gitattributes",
         ".gitignore",
         ".git"

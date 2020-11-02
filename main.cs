@@ -165,8 +165,6 @@ namespace HunterPie.Plugins {
             InitializeSessionAsync();
             syncThreadReference = new Thread(syncThread);
 
-            //part of temporary workaround
-            delay = UserSettings.PlayerConfig.Overlay.GameScanDelay;
         }
 
         public void Unload() {
@@ -174,11 +172,11 @@ namespace HunterPie.Plugins {
             Context.Player.OnCharacterLogout -= OnCharacterLogout;
             Context.Player.OnZoneChange -= OnZoneChange;
             Context.FirstMonster.OnHPUpdate -= OnHPUpdate;
-            Context.FirstMonster.OnMonsterSpawn += OnMonsterSpawn;
+            Context.FirstMonster.OnMonsterSpawn -= OnMonsterSpawn;
             Context.FirstMonster.OnMonsterDespawn -= OnMonsterDespawn;
             Context.FirstMonster.OnMonsterDeath -= OnMonsterDeath;
             Context.SecondMonster.OnHPUpdate -= OnHPUpdate;
-            Context.SecondMonster.OnMonsterSpawn += OnMonsterSpawn;
+            Context.SecondMonster.OnMonsterSpawn -= OnMonsterSpawn;
             Context.SecondMonster.OnMonsterDespawn -= OnMonsterDespawn;
             Context.SecondMonster.OnMonsterDeath -= OnMonsterDeath;
             Context.ThirdMonster.OnHPUpdate -= OnHPUpdate;
@@ -196,8 +194,6 @@ namespace HunterPie.Plugins {
                 Context.ThirdMonster.Ailments[i].OnBuildupChange -= OnBuildupChange;
             }
 
-            //part of temporary workaround
-            UserSettings.PlayerConfig.Overlay.GameScanDelay = delay;
 
             if (isInParty) {
                 quitSession();
@@ -515,9 +511,7 @@ namespace HunterPie.Plugins {
                 return;
             }
 
-            //part of temporary workaround
             delay = UserSettings.PlayerConfig.Overlay.GameScanDelay;
-            UserSettings.PlayerConfig.Overlay.GameScanDelay = 2000;
 
             log("Started sync thread", true);
             syncThreadReference.Start();
@@ -534,9 +528,6 @@ namespace HunterPie.Plugins {
         private void stopSyncThread() {
             syncThreadReference.Abort();
             log("Stopped sync thread", true);
-
-            //part of temporary workaround
-            UserSettings.PlayerConfig.Overlay.GameScanDelay = delay;
         }
 
         private void syncThread() {

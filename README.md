@@ -1,12 +1,12 @@
 # Important notice:
+29/11/2020
+
+Update: Thanks to recent changes to HunterPie the plugin is now easier to work on. I will release an updated version soon.
+
 01/11/2020
 
 The plugin is currently causing several issues without providing the intended functionality, therefore I've shut down the server until they are resolved.<br><br>
 
-
-29/11/2020
-
-Thanks to recent changes to HunterPie the plugin is now easier to work on. I will release an updated version soon.
 
 
 Description:

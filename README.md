@@ -1,7 +1,12 @@
 # Important notice:
 01/11/2020
 
-The plugin is currently causing several issues without providing the intended functionality, therefore I've shut down the server until they are resolved.<br>
+The plugin is currently causing several issues without providing the intended functionality, therefore I've shut down the server until they are resolved.<br><br>
+
+
+29/11/2020
+
+Thanks to recent changes to HunterPie the plugin is now easier to work on. I will release an updated version soon.
 
 
 Description:
@@ -16,6 +21,6 @@ Please note that this plugin has not undergone extensive testing yet as I can't 
 Installation:
 ---------------
 - Method 1:
-	- Download [module.json](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/module.json) and drag the file into you HunterPie application window
+	- Download [module.json](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/module.json) and drag the file into you HunterPie application window.
 - Method 2:
-	- Download the [zipped version](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/Release.zip) and extract it to your HunterPie folder
+	- Download the [zipped version](https://raw.githubusercontent.com/Kaedras/HunterPie-SyncPlugin/master/Release.zip) and extract it to your HunterPie folder.

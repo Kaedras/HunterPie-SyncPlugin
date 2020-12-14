@@ -12,7 +12,7 @@
         "MinimumVersion": "1.0.3.99",
         "FileHashes": {
             "lib\\System.Web.dll": "02976e2dd29a5241483e0d9bf82dc823334dce41d97eeecef35ae8680547d122",
-            "SyncPlugin.dll": "60e2f66de5dba4dcfc111f9cd26328ef167ecbcfeb3d47cdb94f230e9d99cc18"
+            "SyncPlugin.dll": "680b4759c28ca39b917b321c9b7934668309a3878a9e77255848e7e013aba291"
         }
     }
 }

@@ -162,7 +162,7 @@ namespace HunterPie.Plugins {
             if (File.Exists(configPath)) {
                 readConfig();
             } else {
-                config = new Config();
+                createConfig();
             }
 
             while (!isServerAlive()) {

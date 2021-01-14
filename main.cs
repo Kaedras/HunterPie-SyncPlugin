@@ -471,7 +471,10 @@ namespace HunterPie.Plugins {
 
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < Context.Monsters[i].Ailments.Count; j++) {
-                    if (Context.Monsters[i].Ailments[j].Buildup == float.NaN || Context.Monsters[i].Ailments[j].Buildup < 0) {
+                    if (!isInParty) { //quitSession() could have been called while running this loop
+                        return;
+                    }
+                    if (Context.Monsters[i].Ailments[j].Buildup == float.NaN || (int)Context.Monsters[i].Ailments[j].Buildup < 0) {
                         value = 0;
                     } else {
                         value = (int)Context.Monsters[i].Ailments[j].Buildup;
@@ -491,7 +494,10 @@ namespace HunterPie.Plugins {
             int value;
 
             for (int i = 0; i < monster.Parts.Count; i++) {
-                if (monster.Parts[i].Health == float.NaN || monster.Parts[i].Health < 0) {
+                if (!isInParty) { //quitSession() could have been called while running this loop
+                    return;
+                }
+                if (monster.Parts[i].Health == float.NaN || (int)monster.Parts[i].Health < 0) {
                     value = 0;
                 } else {
                     value = (int)monster.Parts[i].Health;

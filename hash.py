@@ -16,7 +16,9 @@ class AutoHasher():
         ".vs",
         ".gitattributes",
         ".gitignore",
-        ".git"
+        ".git",
+        "copy_cs.py",
+        "copy_dll.py"
     ]
 
     def __init__(self):

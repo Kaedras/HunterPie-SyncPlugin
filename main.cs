@@ -347,7 +347,10 @@ namespace HunterPie.Plugins {
             }
         }
 
-        private void OnMonsterDespawn(object source, EventArgs args) {
+        private async void OnMonsterDespawn(object source, EventArgs args) {
+            await System.Threading.Tasks.Task.Yield();
+            Thread.Sleep(100);
+
             if (isInParty && isPartyLeader) {
                 clearMonster(((Monster)source).MonsterNumber - 1);
             }
@@ -374,7 +377,7 @@ namespace HunterPie.Plugins {
                 await System.Threading.Tasks.Task.Yield();
                 Thread.Sleep(1000);
                 sessionID = Context.Player.SessionID;
-            
+
                 if (Context.Player.InPeaceZone || Context.Player.ZoneID == 504 || string.IsNullOrEmpty(sessionID)) { //if player is in peace zone/training area or sessionID is empty
                     if (isInParty) {
                         quitSession();
@@ -513,24 +516,27 @@ namespace HunterPie.Plugins {
             }
         }
 
-        private void quitSession() {
-            if (isPartyLeader) {
-                get(sessionUrlString + "/delete");
+        private async void quitSession() {
+            if (isInParty) {
+                isInParty = false;
+                await System.Threading.Tasks.Task.Yield();
+                Thread.Sleep(200);
+
+                if (statusList.errorCount > 0) {
+                    error(statusList.errorCount + " errors occurred in this session");
+                    error(statusList.ToString());
+                    statusList.clear();
+                } else {
+                    log("No errors occurred in this session", true);
+                }
+                if (isPartyLeader) {
+                    get(sessionUrlString + "/delete");
+                    log("Deleted session", true);
+                } else {
+                    log("Left session");
+                }
+                partyLeader = "";
             }
-            if (statusList.errorCount > 0) {
-                error(statusList.errorCount + " errors occurred in this session");
-                error(statusList.ToString());
-                statusList.clear();
-            } else {
-                log("No errors occurred in this session", true);
-            }
-            if (isInParty && !isPartyLeader) {
-                log("Left session");
-            } else if (isInParty && isPartyLeader) {
-                log("Deleted session", true);
-            }
-            partyLeader = "";
-            isInParty = false;
         }
 
         private void startSyncThread() {
@@ -545,7 +551,7 @@ namespace HunterPie.Plugins {
         }
 
         private void stopSyncThread() {
-            terminateSyncThread = true;           
+            terminateSyncThread = true;
         }
 
         private void syncThread() {

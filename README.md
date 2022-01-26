@@ -1,15 +1,7 @@
-# Important notice:
-14/12/2020
+# Update:
 
-I've just released an update, the plugin should be working now, but it needs more testing. If you encounter any issues please report them by either opening an issue on github or by contacting me on discord (kaedras#8880).
-
-29/11/2020
-
-Update: Thanks to recent changes to HunterPie the plugin is now easier to work on. I will release an updated version soon.
-
-01/11/2020
-
-The plugin is currently causing several issues without providing the intended functionality, therefore I've shut down the server until they are resolved.<br><br>
+This project hasn't been maintained for about a year, and I don't plan on changing that, so I'll archive the repository.
+<br><br>
 
 
 
